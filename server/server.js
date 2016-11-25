@@ -97,15 +97,16 @@ apiRoutes.post('/authenticate', function(req, res) {
 apiRoutes.use(passport.authenticate('jwt', { session: false}));
 
 apiRoutes.post('/publish',function(req,res){
-  if (!req.body.title || !req.body.summary || !req.body.price) {
-    res.json({success: false, msg: 'Please provide title, summary and price.'});
+  if (!req.body.title || !req.body.summary || !req.body.price || !req.body.cant) {
+    res.json({success: false, msg: 'Please provide title, summary and price and cant.'});
   } else {
     var newPublication = new Publication({
       title:    req.body.title,
       summary:  req.body.summary,
       price:    req.body.price,
       date:     Date.now(),
-      user_id:  req.user._id
+      user_id:  req.user._id,
+      cant: req.body.cant
     });
     // save the user
     newPublication.save(function(err) {
@@ -128,6 +129,29 @@ apiRoutes.get('/publications', function(req,res){
      if(err) res.send(500, err.message);
      res.status(200).json(publications);
   });
+});
+
+apiRoutes.get('/publication/:id', function(req,res){
+  Publication.findById(req.params.id, function(err,publication){
+    if(err) return res.send(500, err.message);
+    res.status(200).json(publication);
+  });
+});
+
+apiRoutes.get('/publications/:user_id', function(req,res){
+  Publication.find({user_id : req.params.user_id}, function(err, publications){
+    if(err) return res.send(500, err.message);
+    res.status(200).json(publications);
+  });
+});
+
+apiRoutes.post('/buy/:pub_id', function(req,res){
+});
+
+apiRoutes.get('/purchases/:buyer_id', function(req,res){
+});
+
+apiRoutes.get('/sales/:seller_id', function(req,res){
 });
 
 // route to show a random message (GET http://localhost:8080/api/)

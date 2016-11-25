@@ -8,7 +8,9 @@ var PublicationSchema = new Schema({
   images:   { type: []},
   ar_obj:   { type: String},
   date:     { type: Date },
-  user_id:  { type: Schema.Types.ObjectId, required:true}
+  user_id:  { type: Schema.Types.ObjectId, required:true},
+  cant:     { type: Number, required:true},
+  sells:    { type: Number}  
 });
 
 module.exports = mongoose.model('Publication', PublicationSchema); 
