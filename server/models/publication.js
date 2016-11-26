@@ -10,7 +10,7 @@ var PublicationSchema = new Schema({
   date:     { type: Date },
   user_id:  { type: Schema.Types.ObjectId, required:true},
   cant:     { type: Number, required:true},
-  sells:    { type: Number}  
+  sells:    { type: Number, default: 0}  
 });
 
 module.exports = mongoose.model('Publication', PublicationSchema); 

@@ -10,6 +10,7 @@ var jwt    = require('jwt-simple'); // used to create, sign, and verify tokens
 var config = require('./config'); // get our config file
 var User   = require('./models/user'); // get our mongoose model
 var Publication = require('./models/publication');
+var Transaction = require('./models/transaction');
 
 mongoose.connect('mongodb://localhost/arbuy', function(err, res) {
   if(err) {
@@ -146,12 +147,41 @@ apiRoutes.get('/publications/:user_id', function(req,res){
 });
 
 apiRoutes.post('/buy/:pub_id', function(req,res){
+  Publication.findById(req.params.pub_id, function(err, publication){
+    if(err) return res.send(500, err.message);
+    if(publication.cant < 1) return res.send(500, "No hay cantidad suficiente");
+    publication.cant = publication.cant - 1;
+    publication.sells = publication.sells + 1;
+    publication.save();
+    var newTransaction = new Transaction({
+      pub_id: req.params.pub_id,
+      buyer_id: req.user._id,
+      seller_id: publication.user_id,
+      price: publication.price
+    });
+    // save the user
+    newTransaction.save(function(err) {
+      if (err) {
+        console.log(err);
+        return res.json({success: false, msg: 'Error saving transaction'});
+      }
+      res.json({success: true, msg: 'Successful created new transaction.'});
+    });
+  });
 });
 
-apiRoutes.get('/purchases/:buyer_id', function(req,res){
+apiRoutes.get('/purchases', function(req,res){
+  Transaction.find({ buyer_id: req.user._id},{}, function(err, transactions){
+    if(err) return res.send(500, err.message);
+    res.status(200).json(transactions);
+  });
 });
 
-apiRoutes.get('/sales/:seller_id', function(req,res){
+apiRoutes.get('/sales', function(req,res){
+  Transaction.find({ seller_id: req.user._id},{}, function(err, transactions){
+    if(err) return res.send(500, err.message);
+    res.status(200).json(transactions);
+  });
 });
 
 // route to show a random message (GET http://localhost:8080/api/)
