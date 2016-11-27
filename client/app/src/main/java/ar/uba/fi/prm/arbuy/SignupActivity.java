@@ -10,15 +10,29 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import ar.uba.fi.prm.arbuy.pojo.Response;
+import ar.uba.fi.prm.arbuy.pojo.User;
+import retrofit.Call;
+import retrofit.Callback;
+import retrofit.GsonConverterFactory;
+import retrofit.Retrofit;
+
 /**
  * Created by pablo on 26/11/16.
  */
 public class SignupActivity extends AppCompatActivity {
     private static final String TAG = "SignupActivity";
+    public static final String BASE_URL = "http://192.168.0.101:3000/";
+    private Retrofit retrofit;
+    private RestAPI restAPI;
 
-    private EditText mNameText;
+    private EditText mUsernameText;
     private EditText mEmailText;
     private EditText mPasswordText;
+    private EditText mFirstName;
+    private EditText mLastName;
+    private EditText mAddress;
+    private EditText mCity;
     private Button mSignupButton;
     private TextView mLoginLink;
 
@@ -26,7 +40,15 @@ public class SignupActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
-
+        mUsernameText = (EditText) findViewById(R.id.input_name);
+        mEmailText = (EditText) findViewById(R.id.input_username);
+        mPasswordText = (EditText) findViewById(R.id.input_password);
+        mFirstName = (EditText) findViewById(R.id.input_firstName);
+        mLastName = (EditText) findViewById(R.id.input_lastName);
+        mAddress = (EditText) findViewById(R.id.input_address);
+        mCity = (EditText) findViewById(R.id.input_city);
+        mSignupButton = (Button) findViewById(R.id.btn_signup);
+        mLoginLink = (TextView) findViewById(R.id.link_login);
 
         mSignupButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -42,6 +64,12 @@ public class SignupActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        restAPI = retrofit.create(RestAPI.class);
     }
 
     public void signup() {
@@ -60,22 +88,39 @@ public class SignupActivity extends AppCompatActivity {
         progressDialog.setMessage("Creating Account...");
         progressDialog.show();
 
-        String name = mNameText.getText().toString();
+        String username = mUsernameText.getText().toString();
         String email = mEmailText.getText().toString();
         String password = mPasswordText.getText().toString();
+        String firstName = mFirstName.getText().toString();
+        String lastName = mLastName.getText().toString();
+        String address = mAddress.getText().toString();
+        String city = mCity.getText().toString();
 
-        // TODO: Implement your own signup logic here.
+        User newUser = new User(username,password,email,firstName,lastName,address,city);
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onSignupSuccess or onSignupFailed
-                        // depending on success
-                        onSignupSuccess();
-                        // onSignupFailed();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
+        final Call<Response> response = restAPI.signup(newUser);
+        response.enqueue(new Callback<Response>() {
+            @Override
+            public void onResponse(retrofit.Response<Response> response, Retrofit retrofit) {
+                Log.d(TAG, "Request success");
+                if(response.body().getStatus()) {
+                    Log.d(TAG, "Signup success");
+                    onSignupSuccess();
+                    progressDialog.dismiss();
+                }else{
+                    Log.d(TAG, "Signup error");
+                    Log.d(TAG, "Error msg " + response.body().getMessage());
+                    Toast.makeText(getBaseContext(), "Sign up failed", Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
+                    mSignupButton.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.d(TAG, "Request failure");
+            }
+        });
     }
 
 
@@ -94,15 +139,15 @@ public class SignupActivity extends AppCompatActivity {
     public boolean validate() {
         boolean valid = true;
 
-        String name = mNameText.getText().toString();
+        String name = mUsernameText.getText().toString();
         String email = mEmailText.getText().toString();
         String password = mPasswordText.getText().toString();
 
         if (name.isEmpty() || name.length() < 3) {
-            mNameText.setError("at least 3 characters");
+            mUsernameText.setError("at least 3 characters");
             valid = false;
         } else {
-            mNameText.setError(null);
+            mUsernameText.setError(null);
         }
 
         if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {

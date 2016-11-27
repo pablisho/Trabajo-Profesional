@@ -1,7 +1,9 @@
 package ar.uba.fi.prm.arbuy;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -11,14 +13,24 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import ar.uba.fi.prm.arbuy.pojo.Login;
+import ar.uba.fi.prm.arbuy.pojo.Response;
+import retrofit.Call;
+import retrofit.Callback;
+import retrofit.GsonConverterFactory;
+import retrofit.Retrofit;
+
 /**
  * Created by pablo on 26/11/16.
  */
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
+    public static final String BASE_URL = "http://192.168.0.101:3000/";
+    private Retrofit retrofit;
+    private RestAPI restAPI;
 
-    private EditText mEmailText;
+    private EditText mUsernameText;
     private EditText mPasswordText;
     private Button mLoginButton;
     private TextView mSignupLink;
@@ -27,7 +39,7 @@ public class LoginActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        mEmailText = (EditText) findViewById(R.id.input_email);
+        mUsernameText = (EditText) findViewById(R.id.input_username);
         mPasswordText = (EditText) findViewById(R.id.input_password);
         mLoginButton = (Button) findViewById(R.id.btn_login);
         mSignupLink = (TextView) findViewById(R.id.link_signup);
@@ -49,6 +61,21 @@ public class LoginActivity extends AppCompatActivity {
                 startActivityForResult(intent, REQUEST_SIGNUP);
             }
         });
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        restAPI = retrofit.create(RestAPI.class);
+
+        SharedPreferences preferences = getSharedPreferences("token", MODE_PRIVATE);
+        String token = preferences.getString("token", null);
+        if (token != null) {
+            Log.d(TAG, "Saved user token " + token);
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     public void login() {
@@ -67,20 +94,34 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.setMessage("Authenticating...");
         progressDialog.show();
 
-        String email = mEmailText.getText().toString();
+        String username = mUsernameText.getText().toString();
         String password = mPasswordText.getText().toString();
 
-        // TODO: Implement your own authentication logic here.
+        Login newLogin = new Login(username, password);
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onLoginSuccess or onLoginFailed
-                        onLoginSuccess();
-                        // onLoginFailed();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
+        final Call<Response> response = restAPI.authenticate(newLogin);
+        response.enqueue(new Callback<Response>() {
+            @Override
+            public void onResponse(retrofit.Response<Response> response, Retrofit retrofit) {
+                Log.d(TAG, "Request success");
+                if (response.body().getStatus()) {
+                    Log.d(TAG, "Login success");
+                    onLoginSuccess(response.body().getToken());
+                    progressDialog.dismiss();
+                } else {
+                    mLoginButton.setEnabled(true);
+                    Log.d(TAG, "Login error");
+                    Log.d(TAG, "Error msg " + response.body().getMessage());
+                    Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.d(TAG, "Request failure");
+            }
+        });
     }
 
 
@@ -89,9 +130,6 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == REQUEST_SIGNUP) {
             if (resultCode == RESULT_OK) {
 
-                // TODO: Implement successful signup logic here
-                // By default we just finish the Activity and log them in automatically
-                this.finish();
             }
         }
     }
@@ -102,8 +140,16 @@ public class LoginActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
-    public void onLoginSuccess() {
+    public void onLoginSuccess(String token) {
         mLoginButton.setEnabled(true);
+        SharedPreferences sharedPref = getSharedPreferences("token", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("token", token);
+        editor.commit();
+
+        // Navigate
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
         finish();
     }
 
@@ -116,18 +162,20 @@ public class LoginActivity extends AppCompatActivity {
     public boolean validate() {
         boolean valid = true;
 
-        String email = mEmailText.getText().toString();
+        String email = mUsernameText.getText().toString();
         String password = mPasswordText.getText().toString();
 
-        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            mEmailText.setError("enter a valid email address");
+        /*if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            mUsernameText.setError("enter a valid email address");
+            mUsernameText.requestFocus();
             valid = false;
         } else {
-            mEmailText.setError(null);
-        }
+            mUsernameText.setError(null);
+        }*/
 
         if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
             mPasswordText.setError("between 4 and 10 alphanumeric characters");
+            mPasswordText.requestFocus();
             valid = false;
         } else {
             mPasswordText.setError(null);
