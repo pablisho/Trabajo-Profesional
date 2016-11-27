@@ -77,7 +77,7 @@ apiRoutes.post('/authenticate', function(req, res) {
     if (err) throw err;
 
     if (!user) {
-      res.json({ success: false, message: 'Authentication failed. User not found.' });
+      res.json({ success: false, msg: 'Authentication failed. User not found.' });
     } else if (user) {
       // Check password.
         user.comparePassword(req.body.password, function (err, isMatch) {
@@ -122,7 +122,7 @@ apiRoutes.post('/publish',function(req,res){
 
 apiRoutes.get('/publications', function(req,res){
   var pag = 0;
-  var pagSize = 1;
+  var pagSize = 2;
   if(req.query.pag){
     pag = req.query.pag;
   }
@@ -149,7 +149,7 @@ apiRoutes.get('/publications/:user_id', function(req,res){
 apiRoutes.post('/buy/:pub_id', function(req,res){
   Publication.findById(req.params.pub_id, function(err, publication){
     if(err) return res.send(500, err.message);
-    if(publication.cant < 1) return res.send(500, "No hay cantidad suficiente");
+    if(publication.cant < 1) return res.json({success:false,msg: 'No hay cantidad suficiente'});
     publication.cant = publication.cant - 1;
     publication.sells = publication.sells + 1;
     publication.save();
