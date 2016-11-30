@@ -2,12 +2,15 @@ package ar.uba.fi.prm.arbuy.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -18,6 +21,7 @@ import ar.uba.fi.prm.arbuy.pojo.Publication;
  * Created by pablo on 27/11/16.
  */
 public class PublicationsAdapter extends RecyclerView.Adapter<PublicationsAdapter.PublicationViewHolder> {
+    public static final String BASE_URL = "http://192.168.0.101:3000/";
 
     private List<Publication> itemList;
     private Context context;
@@ -38,6 +42,11 @@ public class PublicationsAdapter extends RecyclerView.Adapter<PublicationsAdapte
     public void onBindViewHolder(PublicationViewHolder holder, int position) {
         holder.title.setText(itemList.get(position).getTitle());
         // Set Image.
+        String url = BASE_URL + "api/getResource?file=" + itemList.get(position).getImage();
+        Log.d("PublicationsAdapter", "Image url " + url);
+        Picasso.with(context)
+                .load(url)
+                .into(holder.photo);
         //holder.photo.setImageResource(itemList.get(position).getImages());
         holder.price.setText(String.valueOf(itemList.get(position).getPrice()));
         holder.description.setText(itemList.get(position).getSummary());

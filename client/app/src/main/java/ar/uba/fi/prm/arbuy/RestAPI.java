@@ -42,4 +42,5 @@ public interface RestAPI {
     @Multipart
     @POST("/api/upload")
     Call<Response> upload(@Header("Authorization") String token, @Part MultipartBody.Part userFile);
+
 }

@@ -108,6 +108,16 @@ apiRoutes.post('/authenticate', function(req, res) {
   });
 });
 
+apiRoutes.get('/getResource', function(req,res){
+  console.log(req.query.file);
+  if(!req.query.file || req.query.file == null || req.query.file == "null"){
+    res.status(400).end();
+  } else {
+    console.log(__dirname + '/' + req.query.file);
+    res.sendFile(__dirname +'/' +req.query.file);
+  }
+});
+
 apiRoutes.use(passport.authenticate('jwt', { session: false}));
 
 apiRoutes.post('/publish',function(req,res){
@@ -121,7 +131,7 @@ apiRoutes.post('/publish',function(req,res){
       date:     Date.now(),
       user_id:  req.user._id,
       cant: req.body.cant,
-      images: req.body.images,
+      image: req.body.image,
       ar_obj : req.body.ar_obj
     });
     // save the user
@@ -138,7 +148,6 @@ apiRoutes.post('/publish',function(req,res){
 apiRoutes.post('/upload', upload.single('userFile'), function(req,res){
   res.json({success : true,  msg: req.file.path});
 });
-
 
 apiRoutes.get('/publications', function(req,res){
   var pag = 0;

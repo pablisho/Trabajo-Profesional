@@ -19,8 +19,8 @@ public class Publication {
     private Integer price;
     @SerializedName("ar_obj")
     private String ar_obj;
-    @SerializedName("images")
-    private List<String> images;
+    @SerializedName("image")
+    private String image;
     @SerializedName("date")
     private Date date;
     @SerializedName("user_id")
@@ -31,13 +31,13 @@ public class Publication {
     private Integer sells;
 
     public Publication(String id, String title, String summary, Integer price, String ar_obj,
-                       List<String> images, Date date, String userId, Integer cant, Integer sells) {
+                       String image, Date date, String userId, Integer cant, Integer sells) {
         this.id = id;
         this.title = title;
         this.summary = summary;
         this.price = price;
         this.ar_obj = ar_obj;
-        this.images = images;
+        this.image = image;
         this.date = date;
         this.userId = userId;
         this.cant = cant;
@@ -84,12 +84,12 @@ public class Publication {
         this.ar_obj = ar_obj;
     }
 
-    public List<String> getImages() {
-        return images;
+    public String getImage() {
+        return image;
     }
 
-    public void setImages(List<String> images) {
-        this.images = images;
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public Date getDate() {

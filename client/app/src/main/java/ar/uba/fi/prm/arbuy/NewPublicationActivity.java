@@ -55,10 +55,10 @@ public class NewPublicationActivity extends AppCompatActivity{
     private EditText mPriceText;
     private EditText mCantText;
     private TextView mPhoto;
-    private Uri mPhotoUri;
+    private String mPhotoPath;
     private ImageView mImageView;
     private TextView mArModel;
-    private Uri mArmodelUri;
+    private String mArPath;
     private Button mPublishButton;
     private Toolbar mToolbar;
 
@@ -122,27 +122,26 @@ public class NewPublicationActivity extends AppCompatActivity{
         if(resultCode == RESULT_OK){
             if(requestCode==REQ_IMAGE) {
                 Uri selectedfile = data.getData(); //The uri with the location of the file
-                mPhotoUri = selectedfile;
                 mPhoto.setText(selectedfile.toString());
                 try {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedfile);
                     mImageView.setImageBitmap(bitmap);
                     mImageView.invalidate();
 
-                    uploadFile(new File(getPath(this,selectedfile)));
+                    uploadFile(new File(getPath(this,selectedfile)), true);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
             } else if(requestCode == REQ_ARMODEL){
                 Uri selectedfile = data.getData(); //The uri with the location of the file
-                mArmodelUri = selectedfile;
                 mArModel.setText(selectedfile.toString());
+                uploadFile(new File(getPath(this, selectedfile)), false);
             }
         }
     }
 
-    private void uploadFile(File file){
+    private void uploadFile(File file, final boolean image){
         RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
         MultipartBody.Part fbody = MultipartBody.Part.createFormData("userFile", file.getName(), requestFile);
         RequestBody name = RequestBody.create(MediaType.parse("text/plain"), file.getName());
@@ -153,6 +152,13 @@ public class NewPublicationActivity extends AppCompatActivity{
                 if (response.code() == 200) {
                     Log.d(TAG, "Request OK");
                     Response r = response.body();
+                    if(r.getStatus()){
+                        if(image){
+                            mPhotoPath = r.getMessage();
+                        }else{
+                            mArPath = r.getMessage();
+                        }
+                    }
                     Log.d(TAG, "File path in server " + r.getMessage());
                 }
             }
@@ -190,7 +196,8 @@ public class NewPublicationActivity extends AppCompatActivity{
 
         List<String> photos = new ArrayList<>();
         photos.add(photoUri);
-        Publication newPublication = new Publication(null,title,description,Integer.valueOf(price), arModelUri,photos,null,null,Integer.valueOf(cant),0);
+        Publication newPublication = new Publication(null,title,description,Integer.valueOf(price),
+                mArPath, mPhotoPath, null, null, Integer.valueOf(cant), 0);
 
         final Call<Response> response = restAPI.publish(mToken, newPublication);
         response.enqueue(new Callback<Response>() {
