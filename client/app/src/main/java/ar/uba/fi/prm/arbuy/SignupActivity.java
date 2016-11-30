@@ -12,10 +12,10 @@ import android.widget.Toast;
 
 import ar.uba.fi.prm.arbuy.pojo.Response;
 import ar.uba.fi.prm.arbuy.pojo.User;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.GsonConverterFactory;
-import retrofit.Retrofit;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by pablo on 26/11/16.
@@ -39,12 +39,12 @@ public class SignupActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_newpublication);
-        mUsernameText = (EditText) findViewById(R.id.input_title);
-        mEmailText = (EditText) findViewById(R.id.input_summary);
-        mPasswordText = (EditText) findViewById(R.id.input_price);
-        mFirstName = (EditText) findViewById(R.id.input_quantity);
-        mLastName = (EditText) findViewById(R.id.input_image);
+        setContentView(R.layout.activity_signup);
+        mUsernameText = (EditText) findViewById(R.id.input_username);
+        mEmailText = (EditText) findViewById(R.id.input_email);
+        mPasswordText = (EditText) findViewById(R.id.input_password);
+        mFirstName = (EditText) findViewById(R.id.input_firstname);
+        mLastName = (EditText) findViewById(R.id.input_lastname);
         mAddress = (EditText) findViewById(R.id.input_address);
         mCity = (EditText) findViewById(R.id.input_city);
         mSignupButton = (Button) findViewById(R.id.btn_signup);
@@ -100,8 +100,9 @@ public class SignupActivity extends AppCompatActivity {
 
         final Call<Response> response = restAPI.signup(newUser);
         response.enqueue(new Callback<Response>() {
+
             @Override
-            public void onResponse(retrofit.Response<Response> response, Retrofit retrofit) {
+            public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
                 Log.d(TAG, "Request success");
                 if(response.body().getStatus()) {
                     Log.d(TAG, "Signup success");
@@ -117,9 +118,10 @@ public class SignupActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Throwable t) {
-                Log.d(TAG, "Request failure");
+            public void onFailure(Call<Response> call, Throwable t) {
+                t.printStackTrace();
             }
+
         });
     }
 

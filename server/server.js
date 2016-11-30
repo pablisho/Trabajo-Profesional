@@ -4,6 +4,7 @@ var bodyParser  = require("body-parser");
 var methodOverride = require("method-override");
 var mongoose = require('mongoose');
 var morgan = require('morgan');
+var multer  =   require('multer');
 var passport	= require('passport');
 var jwt    = require('jwt-simple'); // used to create, sign, and verify tokens
 
@@ -12,13 +13,25 @@ var User   = require('./models/user'); // get our mongoose model
 var Publication = require('./models/publication');
 var Transaction = require('./models/transaction');
 
+var storage =   multer.diskStorage({
+  destination: function (req, file, callback) {
+    callback(null, './uploads');
+  },
+  filename: function (req, file, callback) {
+    callback(null, file.fieldname + '-' + Date.now());
+  }
+});
+//var upload = multer({ storage : storage}).single('file');
+var upload = multer({storage:storage});
+
+
 mongoose.connect('mongodb://localhost/arbuy', function(err, res) {
   if(err) {
     console.log('ERROR: connecting to Database. ' + err);
   }
 });
 
-app.use(bodyParser.urlencoded({ extended: false }));  
+app.use(bodyParser.urlencoded({ extended: true }));  
 app.use(bodyParser.json());  
 app.use(methodOverride());
 app.use(morgan('dev'));
@@ -121,6 +134,11 @@ apiRoutes.post('/publish',function(req,res){
     });
   }
 });
+
+apiRoutes.post('/upload', upload.single('userFile'), function(req,res){
+  res.json({success : true,  msg: req.file.path});
+});
+
 
 apiRoutes.get('/publications', function(req,res){
   var pag = 0;

@@ -25,11 +25,11 @@ import java.util.List;
 
 import ar.uba.fi.prm.arbuy.adapters.OrdersAdapter;
 import ar.uba.fi.prm.arbuy.pojo.Transaction;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.GsonConverterFactory;
-import retrofit.Response;
-import retrofit.Retrofit;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by pablo on 27/11/16.
@@ -119,8 +119,9 @@ public class OrdersActivity extends AppCompatActivity {
         super.onResume();
         Call<List<Transaction>> purchasesCall = restAPI.getPurchases(mToken);
         purchasesCall.enqueue(new Callback<List<Transaction>>() {
+
             @Override
-            public void onResponse(Response<List<Transaction>> response, Retrofit retrofit) {
+            public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
                 if (response.code() == 200) {
                     List<Transaction> orders = response.body();
                     Log.d(TAG, "Received " + orders.size() + " orders");
@@ -134,7 +135,7 @@ public class OrdersActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(Call<List<Transaction>> call, Throwable t) {
                 Log.d(TAG, "Request failure");
                 t.printStackTrace();
             }

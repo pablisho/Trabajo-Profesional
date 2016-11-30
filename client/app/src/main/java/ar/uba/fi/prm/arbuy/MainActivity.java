@@ -25,11 +25,11 @@ import java.util.List;
 
 import ar.uba.fi.prm.arbuy.adapters.PublicationsAdapter;
 import ar.uba.fi.prm.arbuy.pojo.Publication;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.GsonConverterFactory;
-import retrofit.Response;
-import retrofit.Retrofit;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_NEWPUB = 33;
@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         Call<List<Publication>> pubCall = restAPI.getPublications(mToken, 0);
         pubCall.enqueue(new Callback<List<Publication>>() {
             @Override
-            public void onResponse(Response<List<Publication>> response, Retrofit retrofit) {
+            public void onResponse(Call<List<Publication>> call, Response<List<Publication>> response) {
                 if (response.code() == 200) {
                     List<Publication> publications = response.body();
                     Log.d(TAG, "Received " + publications.size() + " publications");
@@ -133,13 +133,12 @@ public class MainActivity extends AppCompatActivity {
 
                     PublicationsAdapter rcAdapter = new PublicationsAdapter(MainActivity.this, publications);
                     mRecyclerView.swapAdapter(rcAdapter,false);
-                    //rcAdapter.notifyDataSetChanged();
                     mRecyclerView.invalidate();
                 }
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(Call<List<Publication>> call, Throwable t) {
                 Log.d(TAG, "Request failure");
                 t.printStackTrace();
             }

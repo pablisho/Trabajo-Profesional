@@ -14,10 +14,10 @@ import android.widget.Toast;
 
 import ar.uba.fi.prm.arbuy.pojo.Login;
 import ar.uba.fi.prm.arbuy.pojo.Response;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.GsonConverterFactory;
-import retrofit.Retrofit;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by pablo on 26/11/16.
@@ -100,8 +100,9 @@ public class LoginActivity extends AppCompatActivity {
 
         final Call<Response> response = restAPI.authenticate(newLogin);
         response.enqueue(new Callback<Response>() {
+
             @Override
-            public void onResponse(retrofit.Response<Response> response, Retrofit retrofit) {
+            public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
                 Log.d(TAG, "Request success");
                 if (response.body().getStatus()) {
                     Log.d(TAG, "Login success");
@@ -117,8 +118,8 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Throwable t) {
-                Log.d(TAG, "Request failure");
+            public void onFailure(Call<Response> call, Throwable t) {
+                t.printStackTrace();
             }
         });
     }
