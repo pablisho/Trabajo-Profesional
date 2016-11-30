@@ -93,7 +93,8 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="24dp"
                 android:padding="12dp"
-                android:text="View in AR"/>
+                android:text="View in AR"
+                android:onClick="viewAr"/>
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/btn_buy"

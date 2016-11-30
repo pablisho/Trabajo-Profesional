@@ -19,6 +19,20 @@ android {
     }
 }
 
+def external_lib_prefix = null
+if (project.hasProperty("Tango.catkin_devel_prefix")) {
+    external_lib_prefix = project.property("Tango.catkin_devel_prefix")
+} else {
+    // Building in standalone sample form.
+    external_lib_prefix = "../libs"
+}
+
+repositories {
+    flatDir {
+        dirs 'aar'
+    }
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:25.0.0'
@@ -29,4 +43,6 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.1.+'
     compile 'com.squareup.retrofit2:converter-gson:2.1.+'
     compile 'com.squareup.picasso:picasso:2.3.3'
+    compile (name: 'tango_support_java_lib', ext: 'aar')
+    compile fileTree(dir: external_lib_prefix + '/jar', include: ['**/*.jar'])
 }

@@ -28,6 +28,7 @@
         <activity android:name=".YourPublicationsActivity" android:theme="@style/AppTheme.Dark" />
         <activity android:name=".NewPublicationActivity" android:theme="@style/AppTheme.Dark" />
         <activity android:name=".PublicationActivity" android:theme="@style/AppTheme.Dark" />
+        <activity android:name=".tango.OcclusionActivity" android:theme="@style/AppTheme.Dark" />
     </application>
 
 </manifest>

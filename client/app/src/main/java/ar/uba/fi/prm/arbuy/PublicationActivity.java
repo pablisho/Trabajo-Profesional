@@ -1,5 +1,6 @@
 package ar.uba.fi.prm.arbuy;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -18,6 +19,7 @@ import com.squareup.picasso.Picasso;
 
 import ar.uba.fi.prm.arbuy.pojo.Publication;
 import ar.uba.fi.prm.arbuy.pojo.Response;
+import ar.uba.fi.prm.arbuy.tango.OcclusionActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
@@ -141,4 +143,8 @@ public class PublicationActivity extends AppCompatActivity {
         });
     }
 
+    public void viewAr(View view){
+        Intent intent = new Intent(getApplicationContext(), OcclusionActivity.class);
+        startActivity(intent);
+    }
 }

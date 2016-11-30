@@ -13,10 +13,8 @@ import com.google.gson.GsonBuilder;
 
 import java.util.List;
 
-import ar.uba.fi.prm.arbuy.adapters.OrdersAdapter;
 import ar.uba.fi.prm.arbuy.adapters.PublicationsAdapter;
 import ar.uba.fi.prm.arbuy.pojo.Publication;
-import ar.uba.fi.prm.arbuy.pojo.Transaction;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
