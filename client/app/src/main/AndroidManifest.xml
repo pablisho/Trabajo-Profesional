@@ -24,6 +24,8 @@
         <activity android:name=".SignupActivity" android:theme="@style/AppTheme.Dark" />
         <activity android:name=".MainActivity" android:theme="@style/AppTheme.Dark" />
         <activity android:name=".OrdersActivity" android:theme="@style/AppTheme.Dark" />
+        <activity android:name=".SalesActivity" android:theme="@style/AppTheme.Dark" />
+        <activity android:name=".YourPublicationsActivity" android:theme="@style/AppTheme.Dark" />
         <activity android:name=".NewPublicationActivity" android:theme="@style/AppTheme.Dark" />
         <activity android:name=".PublicationActivity" android:theme="@style/AppTheme.Dark" />
     </application>

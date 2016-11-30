@@ -2,6 +2,7 @@ package ar.uba.fi.prm.arbuy.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,8 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
+import ar.uba.fi.prm.arbuy.MainActivity;
 import ar.uba.fi.prm.arbuy.R;
 import ar.uba.fi.prm.arbuy.pojo.Transaction;
 
@@ -38,8 +42,14 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
     public void onBindViewHolder(OrderViewHolder holder, int position) {
         holder.title.setText(itemList.get(position).getTitle());
         // Set Image.
-        //holder.photo.setImageResource(itemList.get(position).getImages());
-        holder.price.setText(String.valueOf(itemList.get(position).getPrice()));
+
+        String url = MainActivity.BASE_URL + "api/getResource?file=" + itemList.get(position).getImage();
+        Log.d("OrdersAdapter", "Image url " + url);
+        Picasso.with(context)
+                .load(url)
+                .into(holder.photo);
+        Log.d("OrdersAdapter", "Price " + String.valueOf(itemList.get(position).getPrice()));
+        holder.price.setText("Price " +String.valueOf(itemList.get(position).getPrice()) + "$");
         holder.date.setText(itemList.get(position).getDate().toString());
     }
 

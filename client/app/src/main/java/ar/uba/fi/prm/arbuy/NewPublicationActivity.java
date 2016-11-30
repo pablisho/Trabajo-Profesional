@@ -45,7 +45,6 @@ public class NewPublicationActivity extends AppCompatActivity{
     private static final int REQ_IMAGE = 123;
     private static final int REQ_ARMODEL = 12;
     private static final String TAG = "NewPublicationActivity";
-    public static final String BASE_URL = "http://192.168.0.101:3000/";
     private Retrofit retrofit;
     private RestAPI restAPI;
     private String mToken;
@@ -107,7 +106,7 @@ public class NewPublicationActivity extends AppCompatActivity{
         });
 
         retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(MainActivity.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         restAPI = retrofit.create(RestAPI.class);

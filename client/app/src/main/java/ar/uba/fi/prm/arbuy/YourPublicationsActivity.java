@@ -1,22 +1,12 @@
 package ar.uba.fi.prm.arbuy;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.MenuItem;
-import android.widget.LinearLayout;
-
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -24,6 +14,8 @@ import com.google.gson.GsonBuilder;
 import java.util.List;
 
 import ar.uba.fi.prm.arbuy.adapters.OrdersAdapter;
+import ar.uba.fi.prm.arbuy.adapters.PublicationsAdapter;
+import ar.uba.fi.prm.arbuy.pojo.Publication;
 import ar.uba.fi.prm.arbuy.pojo.Transaction;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,9 +24,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Created by pablo on 27/11/16.
+ * Created by pablo on 30/11/16.
  */
-public class OrdersActivity extends AppCompatActivity {
+public class YourPublicationsActivity extends AppCompatActivity {
     private static final String TAG = "OrdersActivity";
     private Retrofit retrofit;
     private RestAPI restAPI;
@@ -75,25 +67,21 @@ public class OrdersActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        Call<List<Transaction>> purchasesCall = restAPI.getPurchases(mToken);
-        purchasesCall.enqueue(new Callback<List<Transaction>>() {
+        Call<List<Publication>> publicationsCall = restAPI.getYourPublications(mToken);
+        publicationsCall.enqueue(new Callback<List<Publication>>() {
 
             @Override
-            public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
+            public void onResponse(Call<List<Publication>> call, Response<List<Publication>> response) {
                 if (response.code() == 200) {
-                    List<Transaction> orders = response.body();
-                    Log.d(TAG, "Received " + orders.size() + " orders");
-                    for (Transaction order : orders) {
-                        Log.d(TAG, "Order title: " + order.getTitle());
-                    }
+                    List<Publication> publications = response.body();
 
-                    OrdersAdapter rcAdapter = new OrdersAdapter(OrdersActivity.this, orders);
+                    PublicationsAdapter rcAdapter = new PublicationsAdapter(YourPublicationsActivity.this, publications);
                     mRecyclerView.setAdapter(rcAdapter);
                 }
             }
 
             @Override
-            public void onFailure(Call<List<Transaction>> call, Throwable t) {
+            public void onFailure(Call<List<Publication>> call, Throwable t) {
                 Log.d(TAG, "Request failure");
                 t.printStackTrace();
             }

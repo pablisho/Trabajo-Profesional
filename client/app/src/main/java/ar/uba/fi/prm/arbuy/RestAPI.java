@@ -34,11 +34,20 @@ public interface RestAPI {
     Call<List<Publication>> getPublications(@Header("Authorization") String token,
                                             @Query("pag") Integer pag);
 
+    @GET("/api/publications/yours")
+    Call<List<Publication>> getYourPublications(@Header("Authorization") String token);
+
     @GET("/api/publication/{id}")
     Call<Publication> getPublication(@Header("Authorization") String token, @Path("id") String pubId);
 
+    @POST("/api/buy/{id}")
+    Call<Response> buy(@Header("Authorization") String token, @Path("id") String pubId);
+
     @GET("/api/purchases")
     Call<List<Transaction>> getPurchases(@Header("Authorization") String token);
+
+    @GET("/api/sales")
+    Call<List<Transaction>> getSales(@Header("Authorization") String token);
 
     @POST("/api/publish")
     Call<Response> publish(@Header("Authorization") String token, @Body Publication publication);

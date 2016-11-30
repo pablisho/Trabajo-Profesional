@@ -25,7 +25,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
-    public static final String BASE_URL = "http://192.168.0.101:3000/";
     private Retrofit retrofit;
     private RestAPI restAPI;
 
@@ -62,7 +61,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(MainActivity.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         restAPI = retrofit.create(RestAPI.class);

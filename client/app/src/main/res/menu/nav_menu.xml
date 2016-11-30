@@ -30,7 +30,7 @@
                 <item
                     android:id="@+id/nav_publications"
                     android:icon="@drawable/ic_store"
-                    android:title="Your publictions" />
+                    android:title="Your publications" />
                 <item
                     android:id="@+id/nav_ventas"
                     android:icon="@drawable/ic_shopping_cart"

@@ -16,6 +16,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import ar.uba.fi.prm.arbuy.MainActivity;
 import ar.uba.fi.prm.arbuy.OrdersActivity;
 import ar.uba.fi.prm.arbuy.PublicationActivity;
 import ar.uba.fi.prm.arbuy.R;
@@ -25,7 +26,6 @@ import ar.uba.fi.prm.arbuy.pojo.Publication;
  * Created by pablo on 27/11/16.
  */
 public class PublicationsAdapter extends RecyclerView.Adapter<PublicationsAdapter.PublicationViewHolder> {
-    public static final String BASE_URL = "http://192.168.0.101:3000/";
 
     private List<Publication> itemList;
     private Context context;
@@ -46,7 +46,7 @@ public class PublicationsAdapter extends RecyclerView.Adapter<PublicationsAdapte
     public void onBindViewHolder(PublicationViewHolder holder, int position) {
         holder.title.setText(itemList.get(position).getTitle());
         // Set Image.
-        String url = BASE_URL + "api/getResource?file=" + itemList.get(position).getImage();
+        String url = MainActivity.BASE_URL + "api/getResource?file=" + itemList.get(position).getImage();
         Log.d("PublicationsAdapter", "Image url " + url);
         Picasso.with(context)
                 .load(url)

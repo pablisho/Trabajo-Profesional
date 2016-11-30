@@ -102,7 +102,8 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="24dp"
                 android:padding="12dp"
-                android:text="Buy!"/>
+                android:text="Buy!"
+                android:onClick="buy"/>
 
         </LinearLayout>
 

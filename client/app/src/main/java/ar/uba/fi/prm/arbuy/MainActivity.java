@@ -3,8 +3,6 @@ package ar.uba.fi.prm.arbuy;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.internal.NavigationMenuItemView;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -16,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -88,10 +87,17 @@ public class MainActivity extends AppCompatActivity {
                                 intent = new Intent(getApplicationContext(),OrdersActivity.class);
                                 break;
                             case R.id.nav_publications:
+                                intent = new Intent(getApplicationContext(),YourPublicationsActivity.class);
                                 break;
                             case R.id.nav_ventas:
+                                intent = new Intent(getApplicationContext(),SalesActivity.class);
                                 break;
                             case R.id.nav_logout:
+                                SharedPreferences preferences = getSharedPreferences("token", MODE_PRIVATE);
+                                SharedPreferences.Editor editor = preferences.edit();
+                                editor.putString("token", null);
+                                editor.commit();
+                                finish();
                                 break;
                         }
                         if(intent != null) {
@@ -101,9 +107,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-        /*CollapsingToolbarLayout collapsingToolbar =
-                (CollapsingToolbarLayout) findViewById(R.id.collapse_toolbar);
-        collapsingToolbar.setTitle("My Toolbar Tittle");*/
 
         Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
 

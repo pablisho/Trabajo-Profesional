@@ -1,22 +1,12 @@
 package ar.uba.fi.prm.arbuy;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.MenuItem;
-import android.widget.LinearLayout;
-
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -32,10 +22,10 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Created by pablo on 27/11/16.
+ * Created by pablo on 30/11/16.
  */
-public class OrdersActivity extends AppCompatActivity {
-    private static final String TAG = "OrdersActivity";
+public class SalesActivity extends AppCompatActivity{
+    private static final String TAG = "SalesActivity";
     private Retrofit retrofit;
     private RestAPI restAPI;
     private String mToken;
@@ -75,8 +65,8 @@ public class OrdersActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        Call<List<Transaction>> purchasesCall = restAPI.getPurchases(mToken);
-        purchasesCall.enqueue(new Callback<List<Transaction>>() {
+        Call<List<Transaction>> salesCall = restAPI.getSales(mToken);
+        salesCall.enqueue(new Callback<List<Transaction>>() {
 
             @Override
             public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
@@ -87,7 +77,7 @@ public class OrdersActivity extends AppCompatActivity {
                         Log.d(TAG, "Order title: " + order.getTitle());
                     }
 
-                    OrdersAdapter rcAdapter = new OrdersAdapter(OrdersActivity.this, orders);
+                    OrdersAdapter rcAdapter = new OrdersAdapter(SalesActivity.this, orders);
                     mRecyclerView.setAdapter(rcAdapter);
                 }
             }

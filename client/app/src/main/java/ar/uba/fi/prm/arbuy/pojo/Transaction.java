@@ -22,6 +22,8 @@ public class Transaction {
     private String title;
     @SerializedName("date")
     private Date date;
+    @SerializedName("image")
+    private String image;
 
     public String getId() {
         return id;
@@ -77,5 +79,13 @@ public class Transaction {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }

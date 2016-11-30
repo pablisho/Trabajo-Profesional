@@ -155,7 +155,7 @@ apiRoutes.get('/publications', function(req,res){
   if(req.query.pag){
     pag = req.query.pag;
   }
-  Publication.find({},{},{skip: pag*pagSize, limit: pagSize}, function(err, publications){
+  Publication.find({"cant": {"$gt":0}},{},{skip: pag*pagSize, limit: pagSize}, function(err, publications){
      if(err) res.send(500, err.message);
      res.status(200).json(publications);
   });
@@ -168,8 +168,8 @@ apiRoutes.get('/publication/:id', function(req,res){
   });
 });
 
-apiRoutes.get('/publications/:user_id', function(req,res){
-  Publication.find({user_id : req.params.user_id}, function(err, publications){
+apiRoutes.get('/publications/yours', function(req,res){
+  Publication.find({"cant": {"$gt":0}, user_id : req.user._id}, function(err, publications){
     if(err) return res.send(500, err.message);
     res.status(200).json(publications);
   });
@@ -187,7 +187,8 @@ apiRoutes.post('/buy/:pub_id', function(req,res){
       buyer_id: req.user._id,
       seller_id: publication.user_id,
       price: publication.price,
-      title: publication.title
+      title: publication.title,
+      image: publication.image
     });
     // save the user
     newTransaction.save(function(err) {
