@@ -1,6 +1,8 @@
 package ar.uba.fi.prm.arbuy.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +16,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import ar.uba.fi.prm.arbuy.OrdersActivity;
+import ar.uba.fi.prm.arbuy.PublicationActivity;
 import ar.uba.fi.prm.arbuy.R;
 import ar.uba.fi.prm.arbuy.pojo.Publication;
 
@@ -76,6 +80,11 @@ public class PublicationsAdapter extends RecyclerView.Adapter<PublicationsAdapte
         @Override
         public void onClick(View view) {
             Toast.makeText(view.getContext(), "Clicked Position = " + getPosition(), Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(context,PublicationActivity.class);
+            Bundle b = new Bundle();
+            b.putString("pubId", itemList.get(getPosition()).getId()); //Your id
+            intent.putExtras(b);
+            context.startActivity(intent);
         }
     }
 

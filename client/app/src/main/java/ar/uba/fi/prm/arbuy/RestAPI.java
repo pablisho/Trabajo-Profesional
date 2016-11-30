@@ -17,6 +17,7 @@ import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
@@ -32,6 +33,9 @@ public interface RestAPI {
     @GET("/api/publications")
     Call<List<Publication>> getPublications(@Header("Authorization") String token,
                                             @Query("pag") Integer pag);
+
+    @GET("/api/publication/{id}")
+    Call<Publication> getPublication(@Header("Authorization") String token, @Path("id") String pubId);
 
     @GET("/api/purchases")
     Call<List<Transaction>> getPurchases(@Header("Authorization") String token);

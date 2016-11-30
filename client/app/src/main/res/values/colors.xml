@@ -14,4 +14,5 @@
     <color name="gray_intermediate">#AAAAAA</color>
     <color name="gray_light">#E0E0E0</color>
     <color name="black">#000000</color>
+    <color name="red">#FF5555</color>
 </resources>
