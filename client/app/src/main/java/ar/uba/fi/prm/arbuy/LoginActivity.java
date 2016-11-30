@@ -1,7 +1,6 @@
 package ar.uba.fi.prm.arbuy;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -39,8 +38,8 @@ public class LoginActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        mUsernameText = (EditText) findViewById(R.id.input_username);
-        mPasswordText = (EditText) findViewById(R.id.input_password);
+        mUsernameText = (EditText) findViewById(R.id.input_summary);
+        mPasswordText = (EditText) findViewById(R.id.input_price);
         mLoginButton = (Button) findViewById(R.id.btn_login);
         mSignupLink = (TextView) findViewById(R.id.link_signup);
 

@@ -5,6 +5,7 @@ import java.util.List;
 import ar.uba.fi.prm.arbuy.pojo.Login;
 import ar.uba.fi.prm.arbuy.pojo.Publication;
 import ar.uba.fi.prm.arbuy.pojo.Response;
+import ar.uba.fi.prm.arbuy.pojo.Transaction;
 import ar.uba.fi.prm.arbuy.pojo.User;
 import retrofit.Call;
 import retrofit.http.Body;
@@ -27,4 +28,9 @@ public interface RestAPI {
     Call<List<Publication>> getPublications(@Header("Authorization") String token,
                                             @Query("pag") Integer pag);
 
+    @GET("/api/purchases")
+    Call<List<Transaction>> getPurchases(@Header("Authorization") String token);
+
+    @POST("/api/publish")
+    Call<Response> publish(@Header("Authorization") String token, @Body Publication publication);
 }

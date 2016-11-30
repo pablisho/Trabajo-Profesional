@@ -3,37 +3,39 @@ package ar.uba.fi.prm.arbuy;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.internal.NavigationMenuItemView;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
+import android.widget.LinearLayout;
+
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.util.List;
 
-import ar.uba.fi.prm.arbuy.adapters.PublicationsAdapter;
-import ar.uba.fi.prm.arbuy.pojo.Publication;
+import ar.uba.fi.prm.arbuy.adapters.OrdersAdapter;
+import ar.uba.fi.prm.arbuy.pojo.Transaction;
 import retrofit.Call;
 import retrofit.Callback;
 import retrofit.GsonConverterFactory;
 import retrofit.Response;
 import retrofit.Retrofit;
 
-public class MainActivity extends AppCompatActivity {
-    private static final int REQUEST_NEWPUB = 33;
-    private static final String TAG = "MainActivity";
+/**
+ * Created by pablo on 27/11/16.
+ */
+public class OrdersActivity extends AppCompatActivity {
+    private static final String TAG = "OrdersActivity";
     public static final String BASE_URL = "http://192.168.0.101:3000/";
     private Retrofit retrofit;
     private RestAPI restAPI;
@@ -41,16 +43,14 @@ public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
-    private StaggeredGridLayoutManager gaggeredGridLayoutManager;
     private ActionBarDrawerToggle mDrawerToggle;
     private Toolbar mToolbar;
     private RecyclerView mRecyclerView;
-    private FloatingActionButton mFab;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_orders);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
@@ -70,11 +70,14 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView = (RecyclerView)findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
 
-        gaggeredGridLayoutManager = new StaggeredGridLayoutManager(2, 1);
-        mRecyclerView.setLayoutManager(gaggeredGridLayoutManager);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, LinearLayout.VERTICAL);
+        //dividerItemDecoration.setDrawable(ContextCompat.getDrawable(this,R.drawable.ic_drawer));
+        mRecyclerView.addItemDecoration(dividerItemDecoration);
+
 
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
-
         mNavigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
@@ -84,9 +87,6 @@ public class MainActivity extends AppCompatActivity {
                         int id = menuItem.getItemId();
                         Intent intent = null;
                         switch (id){
-                            case R.id.nav_compras:
-                                intent = new Intent(getApplicationContext(),OrdersActivity.class);
-                                break;
                             case R.id.nav_publications:
                                 break;
                             case R.id.nav_ventas:
@@ -97,13 +97,10 @@ public class MainActivity extends AppCompatActivity {
                         if(intent != null) {
                             startActivity(intent);
                         }
+                        finish();
                         return true;
                     }
                 });
-
-        /*CollapsingToolbarLayout collapsingToolbar =
-                (CollapsingToolbarLayout) findViewById(R.id.collapse_toolbar);
-        collapsingToolbar.setTitle("My Toolbar Tittle");*/
 
         Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
 
@@ -118,23 +115,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume(){
+    public void onResume(){
         super.onResume();
-        Call<List<Publication>> pubCall = restAPI.getPublications(mToken, 0);
-        pubCall.enqueue(new Callback<List<Publication>>() {
+        Call<List<Transaction>> purchasesCall = restAPI.getPurchases(mToken);
+        purchasesCall.enqueue(new Callback<List<Transaction>>() {
             @Override
-            public void onResponse(Response<List<Publication>> response, Retrofit retrofit) {
+            public void onResponse(Response<List<Transaction>> response, Retrofit retrofit) {
                 if (response.code() == 200) {
-                    List<Publication> publications = response.body();
-                    Log.d(TAG, "Received " + publications.size() + " publications");
-                    for (Publication publication : publications) {
-                        Log.d(TAG, "Publication: " + publication.getTitle());
+                    List<Transaction> orders = response.body();
+                    Log.d(TAG, "Received " + orders.size() + " orders");
+                    for (Transaction order : orders) {
+                        Log.d(TAG, "Order title: " + order.getTitle());
                     }
 
-                    PublicationsAdapter rcAdapter = new PublicationsAdapter(MainActivity.this, publications);
-                    mRecyclerView.swapAdapter(rcAdapter,false);
-                    //rcAdapter.notifyDataSetChanged();
-                    mRecyclerView.invalidate();
+                    OrdersAdapter rcAdapter = new OrdersAdapter(OrdersActivity.this, orders);
+                    mRecyclerView.setAdapter(rcAdapter);
                 }
             }
 
@@ -144,20 +139,5 @@ public class MainActivity extends AppCompatActivity {
                 t.printStackTrace();
             }
         });
-    }
-
-    public void newPublication(View view){
-        // Start the Signup activity
-        Intent intent = new Intent(getApplicationContext(), NewPublicationActivity.class);
-        startActivityForResult(intent, REQUEST_NEWPUB);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_NEWPUB) {
-            if (resultCode == RESULT_OK) {
-                Toast.makeText(this,"Publication succesful", Toast.LENGTH_LONG).show();
-            }
-        }
     }
 }

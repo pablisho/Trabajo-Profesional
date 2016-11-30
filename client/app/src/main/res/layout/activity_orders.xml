@@ -25,18 +25,6 @@
             android:layout_below="@id/main_toolbar"
             android:scrollbars="vertical" />
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
-            android:src="@drawable/ic_add_white_48dp"
-            app:fabSize="normal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:padding="8dp"
-            app:useCompatPadding="true"
-            android:onClick="newPublication"/>
-
     </RelativeLayout>
 
 

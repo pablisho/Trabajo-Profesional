@@ -39,12 +39,12 @@ public class SignupActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_signup);
-        mUsernameText = (EditText) findViewById(R.id.input_name);
-        mEmailText = (EditText) findViewById(R.id.input_username);
-        mPasswordText = (EditText) findViewById(R.id.input_password);
-        mFirstName = (EditText) findViewById(R.id.input_firstName);
-        mLastName = (EditText) findViewById(R.id.input_lastName);
+        setContentView(R.layout.activity_newpublication);
+        mUsernameText = (EditText) findViewById(R.id.input_title);
+        mEmailText = (EditText) findViewById(R.id.input_summary);
+        mPasswordText = (EditText) findViewById(R.id.input_price);
+        mFirstName = (EditText) findViewById(R.id.input_quantity);
+        mLastName = (EditText) findViewById(R.id.input_image);
         mAddress = (EditText) findViewById(R.id.input_address);
         mCity = (EditText) findViewById(R.id.input_city);
         mSignupButton = (Button) findViewById(R.id.btn_signup);

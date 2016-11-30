@@ -107,7 +107,9 @@ apiRoutes.post('/publish',function(req,res){
       price:    req.body.price,
       date:     Date.now(),
       user_id:  req.user._id,
-      cant: req.body.cant
+      cant: req.body.cant,
+      images: req.body.images,
+      ar_obj : req.body.ar_obj
     });
     // save the user
     newPublication.save(function(err) {
@@ -122,7 +124,7 @@ apiRoutes.post('/publish',function(req,res){
 
 apiRoutes.get('/publications', function(req,res){
   var pag = 0;
-  var pagSize = 2;
+  var pagSize = 50;
   if(req.query.pag){
     pag = req.query.pag;
   }
@@ -157,7 +159,8 @@ apiRoutes.post('/buy/:pub_id', function(req,res){
       pub_id: req.params.pub_id,
       buyer_id: req.user._id,
       seller_id: publication.user_id,
-      price: publication.price
+      price: publication.price,
+      title: publication.title
     });
     // save the user
     newTransaction.save(function(err) {
