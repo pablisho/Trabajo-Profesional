@@ -1,6 +1,7 @@
 #version 300 es
 in vec3 a_Position;
 in vec2 a_TexCoord;
+in vec4 a_Color;
 uniform mat4 u_MvpMatrix;
 out vec2 v_TexCoord;
 

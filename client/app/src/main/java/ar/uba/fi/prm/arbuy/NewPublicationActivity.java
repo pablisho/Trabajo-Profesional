@@ -57,7 +57,7 @@ public class NewPublicationActivity extends AppCompatActivity{
     private String mPhotoPath;
     private ImageView mImageView;
     private TextView mArModel;
-    private String mArPath;
+    private List<String[]> mArPaths = new ArrayList<>();
     private Button mPublishButton;
     private Toolbar mToolbar;
 
@@ -135,7 +135,11 @@ public class NewPublicationActivity extends AppCompatActivity{
             } else if(requestCode == REQ_ARMODEL){
                 Uri selectedfile = data.getData(); //The uri with the location of the file
                 mArModel.setText(selectedfile.toString());
-                uploadFile(new File(getPath(this, selectedfile)), false);
+                File folder = new File(getPath(this, selectedfile));
+                File files[] = folder.listFiles();
+                for(File file : files){
+                    uploadFile(file, false);
+                }
             }
         }
     }
@@ -143,7 +147,6 @@ public class NewPublicationActivity extends AppCompatActivity{
     private void uploadFile(File file, final boolean image){
         RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
         MultipartBody.Part fbody = MultipartBody.Part.createFormData("userFile", file.getName(), requestFile);
-        RequestBody name = RequestBody.create(MediaType.parse("text/plain"), file.getName());
         Call<Response> call = restAPI.upload(mToken, fbody);
         call.enqueue(new Callback<Response>() {
             @Override
@@ -151,11 +154,13 @@ public class NewPublicationActivity extends AppCompatActivity{
                 if (response.code() == 200) {
                     Log.d(TAG, "Request OK");
                     Response r = response.body();
-                    if(r.getStatus()){
-                        if(image){
+                    if (r.getStatus()) {
+                        if (image) {
                             mPhotoPath = r.getMessage();
-                        }else{
-                            mArPath = r.getMessage();
+                        } else {
+                            synchronized (mArPaths) {
+                                mArPaths.add(new String[]{r.getMessage(), r.getName()});
+                            }
                         }
                     }
                     Log.d(TAG, "File path in server " + r.getMessage());
@@ -183,7 +188,7 @@ public class NewPublicationActivity extends AppCompatActivity{
         final ProgressDialog progressDialog = new ProgressDialog(NewPublicationActivity.this,
                 R.style.AppTheme_Dark_Dialog);
         progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Creating Account...");
+        progressDialog.setMessage("Creating Publication...");
         progressDialog.show();
 
         String title = mTitleText.getText().toString();
@@ -196,7 +201,7 @@ public class NewPublicationActivity extends AppCompatActivity{
         List<String> photos = new ArrayList<>();
         photos.add(photoUri);
         Publication newPublication = new Publication(null,title,description,Integer.valueOf(price),
-                mArPath, mPhotoPath, null, null, Integer.valueOf(cant), 0);
+                mArPaths, mPhotoPath, null, null, Integer.valueOf(cant), 0);
 
         final Call<Response> response = restAPI.publish(mToken, newPublication);
         response.enqueue(new Callback<Response>() {

@@ -6,6 +6,8 @@ uniform float u_Width;
 uniform float u_Height;
 uniform sampler2D u_Texture;
 uniform sampler2D u_depthTexture;
+uniform bool u_hasTexture;
+uniform vec4 u_Color;
 in vec2 v_TexCoord;
 out vec4 gl_FragColor;
 
@@ -47,6 +49,11 @@ void main() {
     vec2 coords = vec2(_u, _v);
     float currentZ = linearDepth(gl_FragCoord.z * 2.0 - 1.0);
     float certainty = occCertainty(u_depthTexture, coords, currentZ);
-    vec4 textureColor = texture(u_Texture,v_TexCoord);
-    gl_FragColor = vec4(textureColor.rgb, textureColor.a * (1.0 - certainty));
+    vec4 color;
+    if(u_hasTexture){
+      color = texture(u_Texture,v_TexCoord);
+    }else{
+      color = u_Color;
+    }
+    gl_FragColor = vec4(color.rgb, color.a * (1.0 - certainty));
 }

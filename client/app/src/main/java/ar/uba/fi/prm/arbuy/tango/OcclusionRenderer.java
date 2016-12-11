@@ -1,18 +1,3 @@
-/*
- * Copyright 2016 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package ar.uba.fi.prm.arbuy.tango;
 
 import com.google.atap.tango.mesh.TangoMesh;
@@ -25,16 +10,22 @@ import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.util.Log;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import ar.uba.fi.prm.arbuy.R;
+import ar.uba.fi.prm.arbuy.loader.LoaderOBJ;
+import ar.uba.fi.prm.arbuy.loader.ParsingException;
 import ar.uba.fi.prm.arbuy.meshing.GridIndex;
 import ar.uba.fi.prm.arbuy.meshing.MeshSegment;
 import ar.uba.fi.prm.arbuy.opengl.DepthTexture;
+import ar.uba.fi.prm.arbuy.opengl.Object3D;
 import ar.uba.fi.prm.arbuy.opengl.OpenGlCameraPreview;
 import ar.uba.fi.prm.arbuy.opengl.OpenGlSphere;
 
@@ -43,6 +34,7 @@ import ar.uba.fi.prm.arbuy.opengl.OpenGlSphere;
  * It also renders a depth texture to occlude the sphere if it is behind an object.
  */
 public class OcclusionRenderer implements GLSurfaceView.Renderer {
+    private static final String TAG = "OcclusionRenderer";
 
     /**
      * A small callback to allow the caller to introduce application-specific code to be executed
@@ -66,7 +58,9 @@ public class OcclusionRenderer implements GLSurfaceView.Renderer {
     private float[] mProjectionMatrix = new float[16];
     private float[] mVPMatrix = new float[16];
 
-    public OcclusionRenderer(Context context, RenderCallback callback) {
+    List<Object3D> parsedObjects;
+
+    public OcclusionRenderer(String path, Context context, RenderCallback callback) {
         mContext = context;
         mRenderCallback = callback;
         mOpenGlCameraPreview = new OpenGlCameraPreview();
@@ -74,14 +68,31 @@ public class OcclusionRenderer implements GLSurfaceView.Renderer {
 
         float[] worldTsphere = new float[16];
         Matrix.setIdentityM(worldTsphere, 0);
-        Matrix.translateM(worldTsphere, 0, 0, 0, -2);
+        Matrix.translateM(worldTsphere, 0, 0, 0, -1);
         mOpenGlSphere.setModelMatrix(worldTsphere);
+        //Matrix.translateM(worldTsphere, 0, 0, 0, -20);
 
         mDepthTexture = new DepthTexture();
         float[] worldTmesh = new float[16];
         Matrix.setIdentityM(worldTmesh, 0);
         Matrix.rotateM(worldTmesh, 0, -90, 1, 0, 0);
         mDepthTexture.setModelMatrix(worldTmesh);
+
+        Log.d(TAG, "File obj path " + path);
+        File file = new File(context.getExternalFilesDir(null) + File.separator + path);
+
+        LoaderOBJ loader = new LoaderOBJ(context, file);
+        try {
+            parsedObjects = loader.parse();
+        }catch(ParsingException e){
+            Log.w(TAG, "Error Parsing OBJ");
+            e.printStackTrace();
+        }
+
+        for(Object3D obj : parsedObjects){
+            obj.setModelMatrix(worldTsphere);
+        }
+
     }
 
     @Override
@@ -99,6 +110,9 @@ public class OcclusionRenderer implements GLSurfaceView.Renderer {
         Bitmap earthBitmap = BitmapFactory.decodeResource(mContext.getResources(),
                 R.drawable.earth, options);
         mOpenGlSphere.setUpProgramAndBuffers(earthBitmap, mContext);
+        for(Object3D obj : parsedObjects){
+            obj.setUpProgramAndBuffers(mContext);
+        }
         mDepthTexture.resetDepthTexture();
         mMeshMap.clear();
     }
@@ -117,6 +131,9 @@ public class OcclusionRenderer implements GLSurfaceView.Renderer {
         GLES20.glViewport(0, 0, width, height);
         mDepthTexture.setTextureSize(width, height);
         mOpenGlSphere.setDepthTextureSize(width, height);
+        for(Object3D obj : parsedObjects){
+            obj.setDepthTextureSize(width, height);
+        }
         mProjectionMatrixConfigured = false;
     }
 
@@ -143,7 +160,10 @@ public class OcclusionRenderer implements GLSurfaceView.Renderer {
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
         // Render objects.
-        mOpenGlSphere.drawSphere(mVPMatrix, depthTexture);
+        //mOpenGlSphere.drawSphere(mVPMatrix, depthTexture);
+        for(Object3D obj : parsedObjects){
+            obj.drawSphere(mVPMatrix, depthTexture);
+        }
     }
 
     /**
@@ -153,6 +173,9 @@ public class OcclusionRenderer implements GLSurfaceView.Renderer {
     public void setProjectionMatrix(float[] matrixFloats, float nearPlane, float farPlane) {
         mProjectionMatrix = matrixFloats;
         mOpenGlSphere.configureCamera(nearPlane, farPlane);
+        for(Object3D obj : parsedObjects){
+            obj.configureCamera(nearPlane, farPlane);
+        }
         mProjectionMatrixConfigured = true;
     }
 
@@ -202,6 +225,9 @@ public class OcclusionRenderer implements GLSurfaceView.Renderer {
      */
     public void updateEarthTransform(float[] openGlTearth) {
         mOpenGlSphere.setModelMatrix(openGlTearth);
+        for(Object3D obj : parsedObjects){
+            obj.setModelMatrix(openGlTearth);
+        }
     }
 
     public boolean isProjectionMatrixConfigured() {

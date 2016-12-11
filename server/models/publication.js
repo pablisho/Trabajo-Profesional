@@ -6,7 +6,7 @@ var PublicationSchema = new Schema({
   summary:  { type: String, required:true},
   price:    { type: Number, required:true},
   image:   { type: String},
-  ar_obj:   { type: String},
+  ar_obj:   { type: []},
   date:     { type: Date },
   user_id:  { type: Schema.Types.ObjectId, required:true},
   cant:     { type: Number, required:true},

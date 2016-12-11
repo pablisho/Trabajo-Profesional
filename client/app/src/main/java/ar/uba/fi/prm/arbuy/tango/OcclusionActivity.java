@@ -1,19 +1,3 @@
-/*
- * Copyright 2016 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package ar.uba.fi.prm.arbuy.tango;
 
 import com.google.atap.tango.mesh.TangoMesh;
@@ -113,7 +97,11 @@ public class OcclusionActivity extends Activity implements View.OnTouchListener 
                 }
             }, null);
         }
-        connectRenderer();
+        Bundle b = getIntent().getExtras();
+        String path = null; // or other values
+        if(b != null)
+            path = b.getString("objfile");
+        connectRenderer(path);
     }
 
     @Override
@@ -190,6 +178,7 @@ public class OcclusionActivity extends Activity implements View.OnTouchListener 
         // Depth information is need for the mesh reconstruction.
         config.putBoolean(TangoConfig.KEY_BOOLEAN_DEPTH, true);
         config.putInt(TangoConfig.KEY_INT_DEPTH_MODE, TangoConfig.TANGO_DEPTH_MODE_POINT_CLOUD);
+        config.putInt(TangoConfig.KEY_INT_RUNTIME_DEPTH_FRAMERATE, 1);
         // Color camera is needed for AR.
         config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
         return config;
@@ -267,14 +256,16 @@ public class OcclusionActivity extends Activity implements View.OnTouchListener 
         // Start the scene reconstruction. We will start getting new meshes from TangoMesher. These
         // meshes will be rendered to a depth texture to do the occlusion.
         mTangoMesher.startSceneReconstruction();
+
+        mTango.setRuntimeConfig(mConfig);
     }
 
     /**
      * Connects the view and renderer to the color camera and callbacks.
      */
-    private void connectRenderer() {
+    private void connectRenderer(String path) {
         mSurfaceView.setEGLContextClientVersion(2);
-        mRenderer = new OcclusionRenderer(OcclusionActivity.this, new OcclusionRenderer
+        mRenderer = new OcclusionRenderer(path, OcclusionActivity.this, new OcclusionRenderer
                 .RenderCallback() {
             @Override
             public void preRender() {
@@ -473,7 +464,7 @@ public class OcclusionActivity extends Activity implements View.OnTouchListener 
 
                 if (planeFitTransform != null) {
                     // Place the earth 30 cm above the plane.
-                    Matrix.translateM(planeFitTransform, 0, 0, 0, 0.3f);
+                    //Matrix.translateM(planeFitTransform, 0, 0, 0, 0.3f);
                     mRenderer.updateEarthTransform(planeFitTransform);
                 }
 
@@ -570,6 +561,7 @@ public class OcclusionActivity extends Activity implements View.OnTouchListener 
         float[] depthTplane = matrixFromPointNormalUp(point, normal, depthUp);
         float[] openGlTplane = new float[16];
         Matrix.multiplyMM(openGlTplane, 0, openGlTdepth, 0, depthTplane, 0);
+        Matrix.rotateM(openGlTplane,0,90,1,0,0);
         return openGlTplane;
     }
 

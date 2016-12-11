@@ -32,7 +32,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_NEWPUB = 33;
     private static final String TAG = "MainActivity";
-    public static final String BASE_URL = "http://192.168.0.101:3000/";
+    public static final String BASE_URL = "http://192.168.0.102:3000/";
     private Retrofit retrofit;
     private RestAPI restAPI;
     private String mToken;

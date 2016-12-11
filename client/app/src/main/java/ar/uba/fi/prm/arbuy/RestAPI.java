@@ -10,6 +10,7 @@ import ar.uba.fi.prm.arbuy.pojo.Transaction;
 import ar.uba.fi.prm.arbuy.pojo.User;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -55,5 +56,8 @@ public interface RestAPI {
     @Multipart
     @POST("/api/upload")
     Call<Response> upload(@Header("Authorization") String token, @Part MultipartBody.Part userFile);
+
+    @GET("api/getResource")
+    Call<ResponseBody> downloadFile(@Query("file") String file);
 
 }

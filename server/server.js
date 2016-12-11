@@ -18,7 +18,7 @@ var storage =   multer.diskStorage({
     callback(null, './uploads');
   },
   filename: function (req, file, callback) {
-    callback(null, file.fieldname + '-' + Date.now());
+    callback(null, file.fieldname + '-' + Date.now());  
   }
 });
 //var upload = multer({ storage : storage}).single('file');
@@ -114,6 +114,7 @@ apiRoutes.get('/getResource', function(req,res){
     res.status(400).end();
   } else {
     console.log(__dirname + '/' + req.query.file);
+    res.status(200);
     res.sendFile(__dirname +'/' +req.query.file);
   }
 });
@@ -146,7 +147,8 @@ apiRoutes.post('/publish',function(req,res){
 });
 
 apiRoutes.post('/upload', upload.single('userFile'), function(req,res){
-  res.json({success : true,  msg: req.file.path});
+  console.log(req.file);
+  res.json({success : true,  msg: req.file.path, name: req.file.originalname});
 });
 
 apiRoutes.get('/publications', function(req,res){

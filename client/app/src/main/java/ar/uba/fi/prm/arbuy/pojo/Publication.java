@@ -18,7 +18,7 @@ public class Publication {
     @SerializedName("price")
     private Integer price;
     @SerializedName("ar_obj")
-    private String ar_obj;
+    private List<String[]> ar_obj;
     @SerializedName("image")
     private String image;
     @SerializedName("date")
@@ -30,7 +30,7 @@ public class Publication {
     @SerializedName("sells")
     private Integer sells;
 
-    public Publication(String id, String title, String summary, Integer price, String ar_obj,
+    public Publication(String id, String title, String summary, Integer price, List<String[]> ar_obj,
                        String image, Date date, String userId, Integer cant, Integer sells) {
         this.id = id;
         this.title = title;
@@ -76,11 +76,11 @@ public class Publication {
         this.price = price;
     }
 
-    public String getAr_obj() {
+    public List<String[]> getAr_obj() {
         return ar_obj;
     }
 
-    public void setAr_obj(String ar_obj) {
+    public void setAr_obj(List<String[]> ar_obj) {
         this.ar_obj = ar_obj;
     }
 

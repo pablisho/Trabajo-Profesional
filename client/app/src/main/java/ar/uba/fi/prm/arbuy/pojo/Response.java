@@ -12,6 +12,8 @@ public class Response {
     private String message;
     @SerializedName("token")
     private String token;
+    @SerializedName("name")
+    private String name;
 
     public Boolean getStatus() {
         return status;
@@ -35,5 +37,13 @@ public class Response {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

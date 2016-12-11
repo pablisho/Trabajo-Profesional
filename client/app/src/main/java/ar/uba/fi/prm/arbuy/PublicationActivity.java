@@ -17,9 +17,18 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Random;
+import java.util.UUID;
+
 import ar.uba.fi.prm.arbuy.pojo.Publication;
 import ar.uba.fi.prm.arbuy.pojo.Response;
 import ar.uba.fi.prm.arbuy.tango.OcclusionActivity;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
@@ -46,6 +55,8 @@ public class PublicationActivity extends AppCompatActivity {
     private Button mBuyButton;
 
     private String mPubId;
+
+    private String objFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,13 +93,13 @@ public class PublicationActivity extends AppCompatActivity {
         mToken = preferences.getString("token", null);
 
         Bundle b = getIntent().getExtras();
-        if(b != null) {
+        if (b != null) {
             mPubId = b.getString("pubId");
         }
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
 
         Log.d(TAG, "Publication id" + mPubId);
@@ -108,6 +119,29 @@ public class PublicationActivity extends AppCompatActivity {
                     mCant.setText("Qty: " + publication.getCant());
                     mSales.setText("Sold: " + publication.getSells());
                     mDescription.setText(publication.getSummary());
+
+                    final UUID uuid = UUID.randomUUID();
+                    for (final String[] pair : publication.getAr_obj()) {
+                        Log.d(TAG, "AR file: path:" + pair[0] + "name" + pair[1]);
+                        final Call<ResponseBody> file = restAPI.downloadFile(pair[0]);
+                        file.enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                                if (response.code() == 200) {
+                                    if(pair[1].contains("obj")){
+                                        objFile = uuid.toString() + File.separator + pair[1];
+                                    }
+                                    saveFile(response.body(), pair[1], uuid.toString());
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                Log.d(TAG, "Request failure");
+                                t.printStackTrace();
+                            }
+                        });
+                    }
                 }
             }
 
@@ -119,17 +153,17 @@ public class PublicationActivity extends AppCompatActivity {
         });
     }
 
-    public void buy(View view){
+    public void buy(View view) {
         final Call<Response> pubCall = restAPI.buy(mToken, mPubId);
         pubCall.enqueue(new Callback<Response>() {
             @Override
             public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
                 if (response.code() == 200) {
                     Response resp = response.body();
-                    if(resp.getStatus()){
+                    if (resp.getStatus()) {
                         Toast.makeText(PublicationActivity.this, "Transaction completed succesfully", Toast.LENGTH_LONG).show();
                         finish();
-                    }else{
+                    } else {
                         Toast.makeText(PublicationActivity.this, "Transaction could not be completed", Toast.LENGTH_LONG).show();
                     }
                 }
@@ -143,8 +177,69 @@ public class PublicationActivity extends AppCompatActivity {
         });
     }
 
-    public void viewAr(View view){
+    public void viewAr(View view) {
         Intent intent = new Intent(getApplicationContext(), OcclusionActivity.class);
+        Bundle b = new Bundle();
+        b.putString("objfile", objFile); //Your id
+        intent.putExtras(b);
         startActivity(intent);
+    }
+
+    public boolean saveFile(ResponseBody body, String fileName, String folder) {
+        try {
+            // todo change the file location/name according to your needs
+            File folderfile = new File(getExternalFilesDir(null) + File.separator + folder);
+            folderfile.mkdirs();
+            File futureStudioIconFile = new File(folderfile + File.separator + fileName);
+
+            Log.d(TAG, "Saving file to " + futureStudioIconFile.toString());
+
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
+
+            try {
+                byte[] fileReader = new byte[4096];
+
+                long fileSize = body.contentLength();
+                long fileSizeDownloaded = 0;
+
+                inputStream = body.byteStream();
+                outputStream = new FileOutputStream(futureStudioIconFile);
+
+                while (true) {
+                    int read = inputStream.read(fileReader);
+
+                    if (read == -1) {
+                        break;
+                    }
+
+                    outputStream.write(fileReader, 0, read);
+
+                    fileSizeDownloaded += read;
+
+                }
+
+                outputStream.flush();
+
+                return true;
+            } catch (IOException e) {
+                Log.d(TAG, "Exception saving file");
+                e.printStackTrace();
+                return false;
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            }
+        } catch (IOException e) {
+            Log.d(TAG, "Exception saving file");
+            e.printStackTrace();
+            return false;
+
+        }
     }
 }

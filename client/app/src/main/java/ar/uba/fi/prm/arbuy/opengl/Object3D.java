@@ -2,17 +2,22 @@ package ar.uba.fi.prm.arbuy.opengl;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
+import android.util.Log;
+
+import java.util.List;
 
 import ar.uba.fi.prm.arbuy.R;
 
-
 /**
- * A sphere that is renderer in AR using OpenGL.
+ * Created by pablo on 10/12/16.
  */
-public class OpenGlSphere {
+public class Object3D {
+    private static final String TAG = "Object3D";
 
     private OpenGlMesh mMesh;
     private int[] mTextures;
@@ -25,57 +30,28 @@ public class OpenGlSphere {
     private float mTextureWidth;
     private float mTextureHeight;
 
-    public OpenGlSphere(float radius, int rows, int columns) {
-        float[] vtmp = new float[rows * columns * 3];
-        // Generate position grid.
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                float theta = i * (float) Math.PI / (rows - 1);
-                float phi = j * 2 * (float) Math.PI / (columns - 1);
-                float x = (float) (radius * Math.sin(theta) * Math.cos(phi));
-                float y = (float) (radius * Math.cos(theta));
-                float z = (float) -(radius * Math.sin(theta) * Math.sin(phi));
-                int index = i * columns + j;
-                vtmp[3 * index] = x;
-                vtmp[3 * index + 1] = y;
-                vtmp[3 * index + 2] = z;
-            }
-        }
+    // Material
+    private String mTextureName;
+    private int mTextureId;
+    private float[] mColor = new float[4];;
 
-        // Create texture grid.
-        float[] ttmp = new float[rows * columns * 2];
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                int index = i * columns + j;
-                ttmp[index * 2] = (float) j / (columns - 1);
-                ttmp[index * 2 + 1] = (float) i / (rows - 1);
-            }
-        }
-
-        // Create indices.
-        int numIndices = 2 * (rows - 1) * columns;
-        short[] itmp = new short[numIndices];
-        short index = 0;
-        for (int i = 0; i < rows - 1; i++) {
-            if ((i & 1) == 0) {
-                for (int j = 0; j < columns; j++) {
-                    itmp[index++] = (short) (i * columns + j);
-                    itmp[index++] = (short) ((i + 1) * columns + j);
-                }
-            } else {
-                for (int j = columns - 1; j >= 0; j--) {
-                    itmp[index++] = (short) ((i + 1) * columns + j);
-                    itmp[index++] = (short) (i * columns + j);
-                }
-            }
-        }
-
-        mMesh = new OpenGlMesh(vtmp, ttmp, itmp, GLES20.GL_TRIANGLE_STRIP);
+    public void setData(float[] vertices, float[] textureCoords, short[] indices){
+        mMesh = new OpenGlMesh(vertices, textureCoords, indices, GLES20.GL_TRIANGLES);
     }
 
-    public void setUpProgramAndBuffers(Bitmap texture, Context context) {
+
+    public void setUpProgramAndBuffers(Context context) {
         mMesh.createVbos();
-        createTexture(texture);
+        if(mTextureName != null){
+            Log.d(TAG, "Bitmap file " + mTextureName);
+            Bitmap bitmap = BitmapFactory.decodeFile(mTextureName);
+
+            createTexture(bitmap);
+        }else if(mTextureId != 0){
+            Log.d(TAG, "Bitmap id " + mTextureId);
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), mTextureId);
+            createTexture(bitmap);
+        }
         mProgram = OpenGlHelper.createProgram(context, R.raw.sphere_vertex_shader, R.raw
                 .sphere_fragment_shader);
     }
@@ -110,15 +86,22 @@ public class OpenGlSphere {
         int uw = GLES20.glGetUniformLocation(mProgram, "u_Width");
         int uh = GLES20.glGetUniformLocation(mProgram, "u_Height");
         int uht = GLES20.glGetUniformLocation(mProgram, "u_hasTexture");
-        int uch = GLES20.glGetAttribLocation(mProgram, "u_Color");
+        int uch = GLES20.glGetUniformLocation(mProgram, "u_Color");
 
         float[] mvpMatrix = new float[16];
         Matrix.multiplyMM(mvpMatrix, 0, vpMatrix, 0, mModelMatrix, 0);
 
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextures[0]);
-        GLES20.glUniform1i(ut, 0);
-        GLES20.glUniform1i(uht, GLES20.GL_TRUE);
+        if(mTextures != null) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextures[0]);
+            GLES20.glUniform1i(ut, 0);
+            GLES20.glUniform1i(uht, GLES20.GL_TRUE);
+        }else{
+            GLES20.glUniform1i(uht, GLES20.GL_FALSE);
+            GLES20.glUniform4fv(uch, 1, mColor, 0);
+        }
+
+
         GLES20.glUniformMatrix4fv(um, 1, false, mvpMatrix, 0);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
@@ -148,4 +131,21 @@ public class OpenGlSphere {
         mTextureHeight = height;
     }
 
+    public void setTexturePath(String textureName){
+        mTextureName = textureName;
+    }
+
+    public void setColor(int color){
+        mColor = new float[4];
+        mColor[0] = (float) Color.red(color) / 255.f;
+        mColor[1] = (float) Color.green(color) / 255.f;
+        mColor[2] = (float) Color.blue(color) / 255.f;
+        //mColor[3] = (float) Color.alpha(color) / 255.f;
+        mColor[3] = 1f;
+        Log.d(TAG, "Setting color r: " + mColor[0] + " g: " + mColor[1] + " b: " + mColor[2] + " a: " + mColor[3]);
+    }
+
+    public void setTextureId(int resourceId){
+        mTextureId = resourceId;
+    }
 }
