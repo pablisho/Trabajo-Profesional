@@ -47,6 +47,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
         Log.d("OrdersAdapter", "Image url " + url);
         Picasso.with(context)
                 .load(url)
+                .placeholder(R.drawable.progress_animation)
                 .into(holder.photo);
         Log.d("OrdersAdapter", "Price " + String.valueOf(itemList.get(position).getPrice()));
         holder.price.setText("Price " +String.valueOf(itemList.get(position).getPrice()) + "$");

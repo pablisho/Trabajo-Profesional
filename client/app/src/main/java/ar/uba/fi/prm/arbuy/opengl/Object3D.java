@@ -148,4 +148,8 @@ public class Object3D {
     public void setTextureId(int resourceId){
         mTextureId = resourceId;
     }
+
+    public void rotate(float angle){
+        Matrix.rotateM(mModelMatrix,0,angle,0,1,0);
+    }
 }

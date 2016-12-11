@@ -21,6 +21,7 @@ import android.opengl.Matrix;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -68,6 +69,8 @@ public class OcclusionActivity extends Activity implements View.OnTouchListener 
 
     private int mColorCameraToDisplayAndroidRotation = 0;
 
+    private GestureDetector gestureDetector;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,9 +102,11 @@ public class OcclusionActivity extends Activity implements View.OnTouchListener 
         }
         Bundle b = getIntent().getExtras();
         String path = null; // or other values
-        if(b != null)
+        if (b != null)
             path = b.getString("objfile");
         connectRenderer(path);
+
+        gestureDetector = new GestureDetector(this, new GestureListener());
     }
 
     @Override
@@ -134,7 +139,7 @@ public class OcclusionActivity extends Activity implements View.OnTouchListener 
                             startupTango();
                             mIsConnected = true;
                         }
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         Log.d(TAG, "Something bad happened");
                     }
                 }
@@ -363,8 +368,9 @@ public class OcclusionActivity extends Activity implements View.OnTouchListener 
 
     /**
      * Use Tango camera intrinsics to calculate the projection Matrix for the OpenGL scene.
+     *
      * @param intrinsics camera instrinsics for computing the project matrix.
-     * @param rotation the relative rotation between the camera intrinsics and display glContext.
+     * @param rotation   the relative rotation between the camera intrinsics and display glContext.
      */
     private static float[] projectionMatrixFromCameraIntrinsics(TangoCameraIntrinsics intrinsics,
                                                                 int rotation) {
@@ -448,36 +454,38 @@ public class OcclusionActivity extends Activity implements View.OnTouchListener 
      */
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-            // Calculate click location in u,v (0;1) coordinates.
-            float u = motionEvent.getX() / view.getWidth();
-            float v = motionEvent.getY() / view.getHeight();
+        if(!gestureDetector.onTouchEvent(motionEvent)) {
+            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                // Calculate click location in u,v (0;1) coordinates.
+                float u = motionEvent.getX() / view.getWidth();
+                float v = motionEvent.getY() / view.getHeight();
 
-            try {
-                // Fit a plane on the clicked point using the latest point cloud data
-                // Synchronize against concurrent access to the RGB timestamp in the OpenGL thread
-                // and a possible service disconnection due to an onPause event.
-                float[] planeFitTransform;
-                synchronized (this) {
-                    planeFitTransform = doFitPlane(u, v, mRgbTimestampGlThread);
+                try {
+                    // Fit a plane on the clicked point using the latest point cloud data
+                    // Synchronize against concurrent access to the RGB timestamp in the OpenGL thread
+                    // and a possible service disconnection due to an onPause event.
+                    float[] planeFitTransform;
+                    synchronized (this) {
+                        planeFitTransform = doFitPlane(u, v, mRgbTimestampGlThread);
+                    }
+
+                    if (planeFitTransform != null) {
+                        // Place the earth 30 cm above the plane.
+                        //Matrix.translateM(planeFitTransform, 0, 0, 0, 0.3f);
+                        mRenderer.updateEarthTransform(planeFitTransform);
+                    }
+
+                } catch (TangoException t) {
+                    Toast.makeText(getApplicationContext(),
+                            "BAD",
+                            Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "BAD", t);
+                } catch (SecurityException t) {
+                    Toast.makeText(getApplicationContext(),
+                            "BAD",
+                            Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "BAD", t);
                 }
-
-                if (planeFitTransform != null) {
-                    // Place the earth 30 cm above the plane.
-                    //Matrix.translateM(planeFitTransform, 0, 0, 0, 0.3f);
-                    mRenderer.updateEarthTransform(planeFitTransform);
-                }
-
-            } catch (TangoException t) {
-                Toast.makeText(getApplicationContext(),
-                        "BAD",
-                        Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "BAD", t);
-            } catch (SecurityException t) {
-                Toast.makeText(getApplicationContext(),
-                        "BAD",
-                        Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "BAD", t);
             }
         }
         return true;
@@ -561,7 +569,7 @@ public class OcclusionActivity extends Activity implements View.OnTouchListener 
         float[] depthTplane = matrixFromPointNormalUp(point, normal, depthUp);
         float[] openGlTplane = new float[16];
         Matrix.multiplyMM(openGlTplane, 0, openGlTdepth, 0, depthTplane, 0);
-        Matrix.rotateM(openGlTplane,0,90,1,0,0);
+        Matrix.rotateM(openGlTplane, 0, 90, 1, 0, 0);
         return openGlTplane;
     }
 
@@ -628,5 +636,35 @@ public class OcclusionActivity extends Activity implements View.OnTouchListener 
             }
             mMeshVector = null;
         }
+    }
+
+    private final class GestureListener extends GestureDetector.SimpleOnGestureListener {
+
+        private static final int SWIPE_THRESHOLD = 50;
+        private static final int SWIPE_VELOCITY_THRESHOLD = 20;
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+            return true;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            boolean result = false;
+            try {
+                float diffX = e2.getX() - e1.getX();
+                if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                    onSwipe(diffX);
+                    result = true;
+                }
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+            return result;
+        }
+    }
+
+    public void onSwipe(float diff) {
+        mRenderer.rotateObject(diff / 30);
     }
 }

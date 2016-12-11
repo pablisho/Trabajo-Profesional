@@ -3,6 +3,7 @@ package ar.uba.fi.prm.arbuy;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -48,6 +49,9 @@ public class SignupActivity extends AppCompatActivity {
         mCity = (EditText) findViewById(R.id.input_city);
         mSignupButton = (Button) findViewById(R.id.btn_signup);
         mLoginLink = (TextView) findViewById(R.id.link_login);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        setSupportActionBar(toolbar);
 
         mSignupButton.setOnClickListener(new View.OnClickListener() {
             @Override

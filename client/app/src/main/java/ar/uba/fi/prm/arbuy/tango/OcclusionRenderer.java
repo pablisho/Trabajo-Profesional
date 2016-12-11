@@ -70,7 +70,6 @@ public class OcclusionRenderer implements GLSurfaceView.Renderer {
         Matrix.setIdentityM(worldTsphere, 0);
         Matrix.translateM(worldTsphere, 0, 0, 0, -1);
         mOpenGlSphere.setModelMatrix(worldTsphere);
-        //Matrix.translateM(worldTsphere, 0, 0, 0, -20);
 
         mDepthTexture = new DepthTexture();
         float[] worldTmesh = new float[16];
@@ -89,8 +88,9 @@ public class OcclusionRenderer implements GLSurfaceView.Renderer {
             e.printStackTrace();
         }
 
+        float[] emptyt = new float[16];
         for(Object3D obj : parsedObjects){
-            obj.setModelMatrix(worldTsphere);
+            obj.setModelMatrix(emptyt);
         }
 
     }
@@ -232,5 +232,11 @@ public class OcclusionRenderer implements GLSurfaceView.Renderer {
 
     public boolean isProjectionMatrixConfigured() {
         return mProjectionMatrixConfigured;
+    }
+
+    public void rotateObject(float angle){
+        for(Object3D obj : parsedObjects){
+            obj.rotate(angle);
+        }
     }
 }

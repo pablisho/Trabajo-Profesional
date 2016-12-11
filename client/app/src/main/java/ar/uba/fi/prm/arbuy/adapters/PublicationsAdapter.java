@@ -50,9 +50,9 @@ public class PublicationsAdapter extends RecyclerView.Adapter<PublicationsAdapte
         Log.d("PublicationsAdapter", "Image url " + url);
         Picasso.with(context)
                 .load(url)
+                .placeholder(R.drawable.progress_animation)
                 .into(holder.photo);
-        //holder.photo.setImageResource(itemList.get(position).getImages());
-        holder.price.setText(String.valueOf(itemList.get(position).getPrice()));
+        holder.price.setText(String.valueOf(itemList.get(position).getPrice()) + "$");
         holder.description.setText(itemList.get(position).getSummary());
     }
 

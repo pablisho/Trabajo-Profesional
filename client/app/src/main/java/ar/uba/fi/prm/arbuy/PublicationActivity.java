@@ -2,6 +2,7 @@ package ar.uba.fi.prm.arbuy;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -50,6 +51,7 @@ public class PublicationActivity extends AppCompatActivity {
     private TextView mCant;
     private TextView mSales;
     private TextView mDescription;
+    private TextView mTitle;
 
     private Button mArButton;
     private Button mBuyButton;
@@ -67,6 +69,7 @@ public class PublicationActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+        mToolbar.setTitle("Publication");
 
         mCollapsingToolbar =
                 (CollapsingToolbarLayout) findViewById(R.id.collapse_toolbar);
@@ -77,6 +80,7 @@ public class PublicationActivity extends AppCompatActivity {
         mCant = (TextView) findViewById(R.id.cant);
         mSales = (TextView) findViewById(R.id.sales);
         mDescription = (TextView) findViewById(R.id.description);
+        mTitle = (TextView) findViewById(R.id.title);
 
         mArButton = (Button) findViewById(R.id.btn_viewar);
         mBuyButton = (Button) findViewById(R.id.btn_buy);
@@ -114,10 +118,15 @@ public class PublicationActivity extends AppCompatActivity {
                     String url = MainActivity.BASE_URL + "api/getResource?file=" + publication.getImage();
                     Picasso.with(PublicationActivity.this)
                             .load(url)
+                            .placeholder(R.drawable.progress_animation)
                             .into(mPhoto);
+                    Typeface roboto = Typeface.createFromAsset(getAssets(),
+                            "font/Roboto-Regular.ttf");
+                    mPrice.setTypeface(roboto);
                     mPrice.setText(String.valueOf(publication.getPrice()) + "$");
                     mCant.setText("Qty: " + publication.getCant());
                     mSales.setText("Sold: " + publication.getSells());
+                    mDescription.setTypeface(roboto);
                     mDescription.setText(publication.getSummary());
 
                     final UUID uuid = UUID.randomUUID();
