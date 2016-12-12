@@ -11,13 +11,13 @@
         android:fitsSystemWindows="true"
         android:id="@+id/MyAppbar"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         app:contentScrim="@color/primary">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:fitsSystemWindows="true"
             android:id="@+id/collapse_toolbar"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_width="match_parent"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
@@ -25,8 +25,8 @@
             <ImageView
                     android:fitsSystemWindows="true"
                     android:id="@+id/bgheader"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
                     android:scaleType="centerCrop" />
 
             <android.support.v7.widget.Toolbar

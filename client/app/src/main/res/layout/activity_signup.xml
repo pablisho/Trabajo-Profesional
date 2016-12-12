@@ -24,12 +24,11 @@
             android:paddingTop="56dp">
 
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="72dp"
-                android:layout_gravity="center_horizontal"
+            <ImageView android:src="@drawable/earth"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
                 android:layout_marginBottom="24dp"
-                android:src="@drawable/ic_drawer" />
+                android:layout_gravity="center_horizontal" />
 
             <!--  Name Label -->
             <android.support.design.widget.TextInputLayout
